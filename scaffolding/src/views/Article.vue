@@ -5,6 +5,9 @@
                 <router-link slot="left" to="/">
                     <mt-button  icon="back"></mt-button>
                 </router-link>
+                <router-link slot="right" to='/me'>
+                    我的
+                </router-link>
             </mt-header>
         </header>
         <!-- 导航导航结束 -->
@@ -16,25 +19,32 @@
                   {{articleInfo.subject}}
                 </div>
                 <div class="question-header-datetime">
-                   {{this.moment.unix(articleInfo.create_at).format('Y年MM月DD日HH:mm')}}
+                   时间：{{this.moment.unix(articleInfo.created_at).format('Y年MM月DD日HH:mm')}}
                 </div>
             </div>
             <!-- 标题结束 -->
             <!-- 作者信息开始 -->
+            <router-link :to="`/author/${articleInfo.id}`">
+                
             <div class="author-info">
                 <img :src="articleInfo.avatar" class="author-info-avatar">
                 <div class="author-info-detail">
                     <div class="author-info-nickname">{{articleInfo.nickname}}</div>
                     <div class="author-info-badge">
-                        共<mt-badge type="primary" size="small">{{articleInfo.article_number}}</mt-badge>篇
+                        文章id为：{{articleInfo.id}}
+                        共发表<mt-badge type="primary" size="small" >{{articleInfo.article_number}}</mt-badge>篇文章
+                        <div>点赞数：{{articleInfo.stars}}</div>
+                    
                     </div>
                 </div>
-                
+              
             </div>
+        </router-link>
             <!-- 作者信息结束 -->
             <!-- 内容开始 -->
             <div class="question-content">
                 <div class="rich-content" v-html="articleInfo.content">               
+                    
                 </div>
             </div>
             <!-- 内容结束 -->
@@ -89,6 +99,10 @@
     padding: 10px;
     background-color:#fff;
 }
+a {
+  text-decoration: none;
+  color:gray;
+}
 </style>
 <style>
 .rich-content p,.rich-content li{
@@ -107,14 +121,19 @@
                 articleInfo:{}
             }
         },
+     
         mounted(){
             let id=this.$route.params.id;
             this.axios.get('/details?id='+id).then(res=>{
                 this.articleInfo=res.data.articleInfo;
                 this.articleInfo.avatar=require('../assets/images/avatar/'+this.articleInfo.avatar);
+            
+               
  
 
             })
-        }
+        },
+        
+      
     }
 </script>

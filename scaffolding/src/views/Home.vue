@@ -12,6 +12,21 @@
       </div>
     </mt-header>
     <!-- 顶部导航结束 -->
+
+    <!-- 查找搜索框开始 -->
+    <div class="search">
+      <form action="" target="frameFile">
+      <mt-search v-model="searchValue"
+      placeholder="搜索"
+      >
+    </mt-search> 
+    <mt-button>查找</mt-button>
+  </form>
+    </div>
+    <!-- 查找搜索框结束 -->
+
+
+
     <!-- 顶部选项卡开始 -->
     <mt-navbar v-model="active">
       <mt-tab-item 
@@ -35,7 +50,7 @@
           <div class="articleItem" 
           v-for="(article,index) of articles" 
           :key="index">
-          <router-link :to="`/article/${article.id}`"></router-link>
+          <router-link :to="`/article/${article.id}`">
             <!-- 文章标题开始 -->
             <div class="articleItem-header">
               {{article.subject}}{{article.id}}
@@ -53,6 +68,7 @@
               {{article.description}}
               </div>
             </div>
+          </router-link>
           </div>
         </mt-tab-container-item>
        
@@ -115,6 +131,12 @@
   letter-spacing: normal;
   color: #444;
 }
+a {
+  text-decoration: none;
+}
+.search {
+  height:60px;
+}
 </style>
 
 <script>
@@ -134,6 +156,7 @@ export default {
       articles:[],
       busy:false,
       page:1,
+      searchValue:''
     };
   },
   methods:{

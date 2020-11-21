@@ -6,6 +6,8 @@ import Infinite from '../views/Infinite.vue'
 import Article from '../views/Article.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/login.vue'
+import me from '../views/me.vue'
+import Author from '../views/Author.vue'
 
 import Header from '../testing/Header.vue'
 import Button from '../testing/Button.vue'
@@ -18,6 +20,10 @@ import Ajax from '../testing/Ajax.vue'
 Vue.use(VueRouter)
 
 const routes = [
+  {
+    path:'/me',
+    component:me
+  },
   {
     path:'/ajax',
     component:Ajax
@@ -42,6 +48,10 @@ const routes = [
   {
     path:'/article/:id',
     component:Article
+  },
+  {
+    path:'/author/:cid',
+    component:Author
   },
   {
     path:'/infinite',

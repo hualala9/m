@@ -3,6 +3,7 @@ const cors=require('cors');
 const mysql=require('mysql');
 const md5=require('md5');
 const bodyParser =require('body-parser');
+const { query } = require('express');
 const pool=mysql.createPool({
     host:'127.0.0.1',
     port:3306,
@@ -68,7 +69,7 @@ server.get('/articles',(req,res)=>{
 // 获取文章详细信息（包括正文，标题）
 server.get('/details',(req,res)=>{
     let id=req.query.id;
-    let sql='SELECT r.id,subject,content,created_at,nickname,avatar,article_number FROM xzqa_article AS r INNER JOIN xzqa_author AS u ON author_id = u.id WHERE r.id=?';
+    let sql='SELECT r.id,subject,content,created_at,nickname,avatar,stars,article_number FROM xzqa_article AS r INNER JOIN xzqa_author AS u ON author_id = u.id WHERE r.id=?';
     pool.query(sql,[id],(error,results)=>{
         if(error) throw error;
         res.send({
@@ -76,14 +77,87 @@ server.get('/details',(req,res)=>{
             code:1,
             articleInfo:results[0]
         });
-
     });
+    ;
 
 });
 
+
+
+// 作者的全部信息,包括所写的文章信息
+server.get('/author',(req,res)=>{
+    // cid是文章的id
+    let cid=req.query.cid;
+    let author={};
+    let discussList=[];
+    // 获取文章的评论信息
+    let sql='select id,discuss,num from xzqa_reader';
+    pool.query(sql,(error,results)=>{
+        if(error) throw error;
+        discussList=results;
+    });
+    sql='select r.id as article_id,subject,content,created_at,nickname,avatar,article_number,author_id,username,image from xzqa_article as r inner join xzqa_author as u on author_id=u.id where author_id=(select author_id from xzqa_article where id=?) order by created_at';
+    pool.query(sql,[cid],(error,results)=>{
+        if(error) throw error;
+        author=results[0];
+        res.send({
+            message:"查询成功",
+            code:1,
+            articleInfo:results,
+            author:author,
+            discussList:discussList
+
+        });
+        // console.log(image);
+    });
+    
+
+});
+
+
+// 把用户评论插入数据库中
+server.post('/indiscuss',(req,res)=>{
+    let id=req.body.id;
+    let author_id=req.body.author_id;
+    let discuss=req.body.discuss;
+    let nickname=req.body.nickname;
+    let it=req.body.it;
+    let sql='insert into xzqa_reader values(?,?,?,?,?)';
+    pool.query(sql,[id,nickname,author_id,discuss,it],(error,results)=>{
+        if(error) throw error;
+        res.send({
+            message:"插入成功",
+            code:1    
+        })
+    })
+})
+
+// 删除某条评论
+server.delete('/deletelist',(req,res)=>{
+    let cid=req.query.cid;
+    console.log(req.query);
+    let it=req.query.it;
+
+    //找出文章id为？的所有评论
+    let sql='delete from xzqa_reader where num=?';
+    // 删除文章的第i条评论
+
+    pool.query(sql,[it],(error,results)=>{
+        if(error) throw error;
+        list=results;
+        // yao删除的数据是list[i]的数据
+      
+        res.send({code:1});
+        
+    })
+
+})
+
+
+
 // 用户注册的接口
 server.post('/register',(req,res)=>{
-    let username=req.body.username;
+    let username=req.bpdy.username;
     let password=req.body.password;
     let sql='select  count(id) as count from xzqa_author where username=?';
     pool.query(sql,[username],(error,results)=>{
@@ -93,7 +167,6 @@ server.post('/register',(req,res)=>{
             pool.query(sql,[username,password],(error,results)=>{
                 if(error) throw error;
                 res.send({message:'注册成功',code:1});
-
             })
         }else {
             res.send({message:'用户已存在',
@@ -130,4 +203,9 @@ server.get('/data',(req,res)=>{
         results:object
     })
 })
+
+
+
+
+
 server.listen(3000);
